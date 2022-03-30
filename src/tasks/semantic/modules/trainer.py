@@ -103,7 +103,7 @@ class Trainer():
       self.model.cuda()
     if torch.cuda.is_available() and torch.cuda.device_count() > 1:
       print("Let's use", torch.cuda.device_count(), "GPUs!")
-      self.model = nn.DataParallel(self.model)   # spread in gpus
+      self.model = nn.DataParallel(self.model).cuda()   # spread in gpus
       self.model = convert_model(self.model).cuda()  # sync batchnorm
       self.model_single = self.model.module  # single model to get weight names
       self.multi_gpu = True
@@ -324,7 +324,7 @@ class Trainer():
         proj_labels_2 = F.upsample(proj_labels,size=(h,w//2),mode='nearest').squeeze(1).cuda(non_blocking=True).long()
         proj_labels = proj_labels.squeeze(1).cuda(non_blocking=True).long()
 
-      [output, z2, z3, z4, z5] = model(in_vol, proj_mask)
+      [output, z2, z3, z4, z5] = model(in_vol, proj_mask).cuda()
       loss = criterion(torch.log(output.clamp(min=1e-8)), proj_labels)+\
         criterion(torch.log(z5.clamp(min=1e-8)), proj_labels_5)+\
         criterion(torch.log(z4.clamp(min=1e-8)), proj_labels_4)+\
