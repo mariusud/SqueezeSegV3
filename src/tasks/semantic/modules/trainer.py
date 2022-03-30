@@ -324,7 +324,7 @@ class Trainer():
         proj_labels_2 = F.upsample(proj_labels,size=(h,w//2),mode='nearest').squeeze(1).cuda(non_blocking=True).long()
         proj_labels = proj_labels.squeeze(1).cuda(non_blocking=True).long()
 
-      [output, z2, z3, z4, z5] = model(in_vol, proj_mask).cuda()
+      [output, z2, z3, z4, z5] = model(in_vol, proj_mask)
       loss = criterion(torch.log(output.clamp(min=1e-8)), proj_labels)+\
         criterion(torch.log(z5.clamp(min=1e-8)), proj_labels_5)+\
         criterion(torch.log(z4.clamp(min=1e-8)), proj_labels_4)+\
