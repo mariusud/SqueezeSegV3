@@ -30,7 +30,7 @@ if __name__ == '__main__':
       '--data_cfg', '-dc',
       type=str,
       required=False,
-      default='config/labels/semantic-kitti.yaml',
+      default='config/labels/industrial.yaml',
       help='Classification yaml cfg file. See /config/labels for sample. No default!',
   )
   parser.add_argument(
