@@ -325,11 +325,12 @@ class Trainer():
         proj_labels = proj_labels.squeeze(1).cuda(non_blocking=True).long()
 
       [output, z2, z3, z4, z5] = model(in_vol, proj_mask)
+      print(z4.shape(), z2.shape(), z4.shape(), z5.shape())
       loss = criterion(torch.log(output.clamp(min=1e-8)), proj_labels)+\
         criterion(torch.log(z5.clamp(min=1e-8)), proj_labels_5)+\
         criterion(torch.log(z4.clamp(min=1e-8)), proj_labels_4)+\
-        #criterion(torch.log(z3.clamp(min=1e-8)), proj_labels_3)+\
-        #criterion(torch.log(z2.clamp(min=1e-8)), proj_labels_2)
+        criterion(torch.log(z3.clamp(min=1e-8)), proj_labels_3)+\
+        criterion(torch.log(z2.clamp(min=1e-8)), proj_labels_2)
       # compute gradient and do SGD step
       optimizer.zero_grad()
       if self.n_gpus > 1:
