@@ -1,0 +1,202 @@
+# This file is covered by the LICENSE file in the root of this project.
+name: "industrial"
+labels:
+  0: "unlabeled"
+  50: "stairs"
+  100: "chimney"
+
+
+color_map: # bgr
+  0: [0, 0, 0]
+  50: [0, 0, 255]
+  100: [255, 255, 50]
+  # 252: [245, 150, 100]
+
+content: # as a ratio with the total number of points
+  0: 0.40
+  50: 0.38
+  100: 0.23
+
+
+# classes that are indistinguishable from single scan or inconsistent in
+# ground truth are mapped to their closest equivalent
+learning_map:
+  0: 0     # "unlabeled"
+  50: 1
+  100: 2
+
+learning_map_inv: # inverse of previous map
+  0: 0      # "unlabeled", and others ignored
+  1: 50
+  2: 100
+
+learning_ignore: # Ignore classes
+  0: False      # "unlabeled", and others ignored    MAYBE CHANGE?
+  1: False
+  2: False
+
+split: # sequence numbers
+  train:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 9
+    - 10
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 35
+    - 36
+    - 37
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 47
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+    - 54
+    - 56
+    - 57
+    - 59
+    - 60
+    - 61
+    - 62
+    - 63
+    - 64
+    # - 65
+    - 66
+    - 67
+    - 69
+    - 70
+    - 71
+    - 72
+    - 73
+    - 74
+    - 75
+    - 76
+    - 77
+    - 79
+    - 80
+    - 81
+    - 82
+    - 83
+    - 84
+    - 85
+    - 86
+    - 87
+    - 89
+    - 90
+    - 91
+    - 92
+    - 93
+    - 94
+    - 95
+    - 96
+    - 97
+    - 99
+    - 100
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    - 106
+    - 107
+    - 109
+    - 100
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    - 106
+    - 107
+    - 109
+    - 110
+    - 111
+    - 112
+    - 113
+    - 114
+    - 115
+    - 116
+    - 117
+    - 119
+    - 120
+    - 121
+    - 122
+    - 123
+    - 124
+    - 125
+    - 126
+    - 128
+    - 129
+    - 140
+    - 141
+    - 142
+    - 143
+    - 144
+    - 145
+    - 146
+    - 147
+    - 149
+    - 150
+    - 151
+    - 152
+    - 153
+    - 154
+    - 156
+    - 157
+    - 158
+    - 159
+    - 160
+  # add 120-160 for chimneyz
+  valid:
+    - 8
+    - 55
+    - 127
+    - 138
+    - 155
+  test:
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 130
+    - 131
+    - 132
+    - 133
+    - 134
+    - 135
+    - 136
+    - 137
+    - 139
