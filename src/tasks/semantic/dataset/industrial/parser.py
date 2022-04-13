@@ -50,7 +50,6 @@ class SemanticKitti(Dataset):
     # are multiple repeated entries, so the number that matters is how many
     # there are for the xentropy)
     self.nclasses = len(self.learning_map_inv)
-    print(self.nclasses)
     # sanity checks
 
     # make sure directory exists
@@ -233,6 +232,7 @@ class Parser():
     self.train_sequences = train_sequences
     self.valid_sequences = valid_sequences
     self.test_sequences = test_sequences
+
     self.labels = labels
     self.color_map = color_map
     self.learning_map = learning_map
@@ -246,7 +246,6 @@ class Parser():
 
     # number of classes that matters is the one for xentropy
     self.nclasses = len(self.learning_map_inv)
-    print(self.nclasses)
     # Data loading code
     if self.train_sequences:
         self.train_dataset = SemanticKitti(root=self.root,
