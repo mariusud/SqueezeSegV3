@@ -76,17 +76,6 @@ if __name__ == '__main__':
     print(e)
     print("Error opening data yaml file.")
     quit()
-
-  # create log folder
-  try:
-    if os.path.isdir(FLAGS.log):
-      shutil.rmtree(FLAGS.log)
-    os.makedirs(FLAGS.log)
-  except Exception as e:
-    print(e)
-    print("Error creating log directory. Check permissions!")
-    quit()
-
   # does model folder exist?
   if FLAGS.pretrained is not None:
     if os.path.isdir(FLAGS.pretrained):
@@ -95,6 +84,18 @@ if __name__ == '__main__':
       print("model folder doesnt exist! Start with random weights...")
   else:
     print("No pretrained directory found.")
+
+  # create log folder
+  try:
+    if os.path.isdir(FLAGS.log):
+      # shutil.rmtree(FLAGS.log)
+      pass
+    os.makedirs(FLAGS.log)
+  except Exception as e:
+    print(e)
+    print("Error creating log directory. Check permissions!")
+    quit()
+
 
   # copy all files to log folder (to remember what we did, and make inference
   # easier). Also, standardize name to be able to open it later

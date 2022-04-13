@@ -24,7 +24,8 @@ from common.sync_batchnorm.batchnorm import convert_model
 from common.warmupLR import *
 from tasks.semantic.modules.segmentator import *
 from tasks.semantic.modules.ioueval import *
-
+import time
+import tensorflow as tf
 
 class Trainer():
   def __init__(self, ARCH, DATA, datadir, logdir, path=None):
@@ -34,9 +35,9 @@ class Trainer():
     self.datadir = datadir
     self.log = logdir
     self.path = path
+    self.writer = tf.summary.create_file_writer(self.log + "/tb")
 
     # put logger where it belongs
-    self.tb_logger = Logger(self.log + "/tb")
     self.info = {"train_update": 0,
                  "train_loss": 0,
                  "train_acc": 0,
@@ -103,7 +104,7 @@ class Trainer():
       self.model.cuda()
     if torch.cuda.is_available() and torch.cuda.device_count() > 1:
       print("Let's use", torch.cuda.device_count(), "GPUs!")
-      self.model = nn.DataParallel(self.model).cuda()   # spread in gpus
+      self.model = nn.DataParallel(self.model, device_ids=[0,1,2]).cuda()   # spread in gpus
       self.model = convert_model(self.model).cuda()  # sync batchnorm
       self.model_single = self.model.module  # single model to get weight names
       self.multi_gpu = True
@@ -116,7 +117,7 @@ class Trainer():
       raise Exception('Loss not defined in config file')
     # loss as dataparallel too (more images in batch)
     if self.n_gpus > 1:
-      self.criterion = nn.DataParallel(self.criterion).cuda()  # spread in gpus
+      self.criterion = nn.DataParallel(self.criterion, device_ids=[0,1,2]).cuda()  # spread in gpus
 
     # optimizer
     if self.ARCH["post"]["CRF"]["use"] and self.ARCH["post"]["CRF"]["train"]:
@@ -157,6 +158,7 @@ class Trainer():
                               warmup_steps=up_steps,
                               momentum=self.ARCH["train"]["momentum"],
                               decay=final_decay)
+    self.tb_logger = Logger(self.log + "/tb")
 
   @staticmethod
   def get_mpl_colormap(cmap_name):
@@ -184,12 +186,13 @@ class Trainer():
     out_img = np.concatenate([out_img, gt_color], axis=0)
     return (out_img).astype(np.uint8)
 
-  @staticmethod
-  def save_to_log(logdir, logger, info, epoch, w_summary=False, model=None, img_summary=False, imgs=[]):
+  def save_to_log(self, logdir, logger, info, epoch, w_summary=False, model=None, img_summary=False, imgs=[]):
     # save scalars
-    for tag, value in info.items():
-      logger.scalar_summary(tag, value, epoch)
-
+    with self.writer.as_default():
+      for tag, value in info.items():
+        logger.scalar_summary(tag, value, epoch)
+        tf.summary.scalar(tag,value,epoch)
+        self.writer.flush()
     # save summaries of weights and biases
     if w_summary and model:
       for tag, value in model.named_parameters():
@@ -198,15 +201,13 @@ class Trainer():
         if value.grad is not None:
           logger.histo_summary(
               tag + '/grad', value.grad.data.cpu().numpy(), epoch)
-
     if img_summary and len(imgs) > 0:
-      directory = os.path.join(logdir, "predictions")
+      directory = os.path.join(logdir, "images")
       if not os.path.isdir(directory):
         os.makedirs(directory)
       for i, img in enumerate(imgs):
         name = os.path.join(directory, str(i) + ".png")
         cv2.imwrite(name, img)
-
   def train(self):
     # accuracy and IoU stuff
     best_train_iou = 0.0
@@ -223,6 +224,7 @@ class Trainer():
     # train for n epochs
     for epoch in range(self.ARCH["train"]["max_epochs"]):
       # get info for learn rate currently
+      time.sleep(10)
       groups = self.optimizer.param_groups
       for name, g in zip(self.lr_group_names, groups):
         self.info[name] = g['lr']
@@ -279,7 +281,8 @@ class Trainer():
         print("*" * 80)
 
         # save to log
-        Trainer.save_to_log(logdir=self.log,
+        Trainer.save_to_log(self,
+                            logdir=self.log,
                             logger=self.tb_logger,
                             info=self.info,
                             epoch=epoch,
@@ -287,6 +290,8 @@ class Trainer():
                             model=self.model_single,
                             img_summary=self.ARCH["train"]["save_scans"],
                             imgs=rand_img)
+        time.sleep(10)
+        
 
     print('Finished Training')
 
@@ -299,14 +304,16 @@ class Trainer():
     acc = AverageMeter()
     iou = AverageMeter()
     update_ratio_meter = AverageMeter()
-
     # empty the cache to train now
     if self.gpu:
       torch.cuda.empty_cache()
-
     # switch to train mode
     model.train()
-
+    time.sleep(10)
+    t = torch.cuda.get_device_properties(0).total_memory
+    r = torch.cuda.memory_reserved(0)
+    a = torch.cuda.memory_allocated(0)
+    print(t,"\nreserved ",r,"\nallocated ",a)
     end = time.time()
     for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_name, _, _, _, _, _, _, _, _, _) in enumerate(train_loader):
         # measure data loading time
@@ -323,9 +330,7 @@ class Trainer():
         proj_labels_3 = F.upsample(proj_labels,size=(h,w//4),mode='nearest').squeeze(1).cuda(non_blocking=True).long()
         proj_labels_2 = F.upsample(proj_labels,size=(h,w//2),mode='nearest').squeeze(1).cuda(non_blocking=True).long()
         proj_labels = proj_labels.squeeze(1).cuda(non_blocking=True).long()
-
       [output, z2, z3, z4, z5] = model(in_vol, proj_mask)
-      print(z4.shape(), z2.shape(), z4.shape(), z5.shape())
       loss = criterion(torch.log(output.clamp(min=1e-8)), proj_labels)+\
         criterion(torch.log(z5.clamp(min=1e-8)), proj_labels_5)+\
         criterion(torch.log(z4.clamp(min=1e-8)), proj_labels_4)+\
