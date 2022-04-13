@@ -239,7 +239,7 @@ class SemLaserScan(LaserScan):
       raise RuntimeError("Filename extension is not valid label file.")
 
     # if all goes well, open label
-    label = np.fromfile(filename, dtype=np.int32)
+    label = np.fromfile(filename, dtype=np.float32)
     label = label.reshape((-1))
 
     # set it
@@ -254,15 +254,15 @@ class SemLaserScan(LaserScan):
 
     # only fill in attribute if the right size
     if label.shape[0] == self.points.shape[0]:
-      self.sem_label = label & 0xFFFF  # semantic label in lower half
-      self.inst_label = label >> 16    # instance id in upper half
+      self.sem_label = label.astype('int32')  # semantic label in lower half
+      self.inst_label = label.astype('int32')    # instance id in upper half
     else:
       print("Points shape: ", self.points.shape)
       print("Label shape: ", label.shape)
       raise ValueError("Scan and Label don't contain same number of points")
 
     # sanity check
-    assert((self.sem_label + (self.inst_label << 16) == label).all())
+    # assert((self.sem_label + (self.inst_label << 16) == label).all())
 
     if self.project:
       self.do_label_projection()
