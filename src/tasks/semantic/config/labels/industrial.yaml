@@ -1,39 +1,49 @@
 # This file is covered by the LICENSE file in the root of this project.
 name: "industrial"
 labels:
-  0: "unlabeled"
+  0: "background"
+  10: "unlabeled"
   50: "stairs"
   100: "chimney"
+  150: "tanks"
 
 
 color_map: # bgr
-  0: [0, 0, 0]
+  0: [0,0,0]
+  10: [0, 255, 0]
   50: [0, 0, 255]
-  100: [255, 255, 50]
+  100: [255, 0, 0]
+  150: [125,125,125]
   # 252: [245, 150, 100]
 
 content: # as a ratio with the total number of points
-  0: 0.40
-  50: 0.38
-  100: 0.23
+  10: 0.25
+  50: 0.25
+  100: 0.25
+  150: 0.25
 
 
 # classes that are indistinguishable from single scan or inconsistent in
 # ground truth are mapped to their closest equivalent
 learning_map:
-  0: 0     # "unlabeled"
-  50: 1
-  100: 2
+  0: 0
+  10: 1     # "unlabeled"
+  50: 2
+  100: 3
+  150: 4
 
 learning_map_inv: # inverse of previous map
   0: 0      # "unlabeled", and others ignored
-  1: 50
-  2: 100
-
+  1: 10
+  2: 50
+  3: 100
+  4: 150
 learning_ignore: # Ignore classes
-  0: False      # "unlabeled", and others ignored    MAYBE CHANGE?
+  0: True
   1: False
   2: False
+  3: False
+  4: False
 
 split: # sequence numbers
   train:
@@ -95,7 +105,6 @@ split: # sequence numbers
     - 72
     - 73
     - 74
-    - 75
     - 76
     - 77
     - 79
@@ -172,13 +181,70 @@ split: # sequence numbers
     - 158
     - 159
     - 160
-  # add 120-160 for chimneyz
+# tanks
+    - 170
+    - 171
+    - 172
+    - 173
+    - 174
+    - 176
+    - 177
+    - 179
+    - 180
+    - 181
+    - 182
+    - 183
+    - 184
+    - 186
+    - 188
+    - 189
+    - 190
+    - 191
+    - 193
+    - 194
+    - 195
+    - 196
+    - 197
+    - 199
+    - 200
+    - 202
+    - 203
+    - 204
+    - 206
+    - 207
+    - 208
+    - 209
+    - 210
+    - 211
+    - 212
+    - 213
+    - 214
+    - 216
+    - 218
+    - 219
+    - 220
+    - 222
+    - 223
+    - 224
+    - 226
+    - 227
+    - 228
+    - 229
+
+
+
   valid:
     - 8
     - 55
+    - 75
     - 127
     - 138
     - 155
+    - 192
+    - 221
+    - 175
+
+
   test:
     - 11
     - 12
@@ -200,3 +266,9 @@ split: # sequence numbers
     - 136
     - 137
     - 139
+    - 187
+    - 217
+    - 201
+
+
+    #160-229
